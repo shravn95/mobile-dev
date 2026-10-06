@@ -62,3 +62,71 @@ Hello World
 
 );
 }
+
+import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+function UnsafeScreen() {
+return (
+<View style={{ flex: 1, backgroundColor: "#1c1c1c" }}>
+<Text style={{ color: "#fff", fontSize: 18, padding: 16 }}>
+Header (Bleeds under Notch!)
+</Text>
+<Text style={{ color: "#aaa", fontSize: 18, padding: 16 }}>
+This content might be hidden behind the status bar in the Dark Mode
+</Text>
+</View>
+);
+}
+
+function SafeScreen() {
+return (
+<SafeAreaView
+edges={["top"]}
+style={{ flex: 1, backgroundColor: "#1c1c1c", paddingTop: 50 }} >
+<Text style={{ color: "#fff", fontSize: 18, padding: 16 }}>
+Header (Safe Area)
+</Text>
+<Text style={{ color: "#aaa", fontSize: 18, padding: 16 }}>
+This content is safe from the status bar in the Dark Mode
+</Text>
+</SafeAreaView>
+);
+}
+
+const index = () => {
+return (
+<>
+<SafeScreen />
+</>
+);
+};
+
+export default index;
+
+const styles = StyleSheet.create({});
+
+import { StatusBar, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const Homescreen = () => {
+const safeAreaInsets = useSafeAreaInsets();
+
+// console.log(safeAreaInsets);
+
+return (
+<View
+style={{
+        flex: 1,
+        paddingTop: safeAreaInsets.top,
+        paddingBottom: safeAreaInsets.bottom,
+      }} >
+<StatusBar barStyle={"light-content"} />
+<Text>Homescreen</Text>
+</View>
+);
+};
+
+export default Homescreen;
+
+const styles = StyleSheet.create({});
