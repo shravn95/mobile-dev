@@ -25,6 +25,176 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## SecureStore notes
+
+This sample demonstrates encrypted local key-value storage with
+[`expo-secure-store`](https://docs.expo.dev/versions/v57.0.0/sdk/securestore/).
+The implementation is in [`src/app/index.tsx`](./src/app/index.tsx).
+
+### Installation
+
+Use Expo's installer so the package version matches the Expo SDK:
+
+```bash
+npx expo install expo-secure-store
+```
+
+Import SecureStore with its namespace:
+
+```tsx
+import * as SecureStore from "expo-secure-store";
+```
+
+### Save and read a token
+
+SecureStore values are strings. Save a token with `setItemAsync` and read it
+with `getItemAsync`:
+
+```tsx
+await SecureStore.setItemAsync("token", "my-secret-token");
+
+const token = await SecureStore.getItemAsync("token");
+console.log(token);
+```
+
+`getItemAsync` returns `null` when the key does not exist. Applications should
+handle that case before displaying or using the value.
+
+### Save an object
+
+Objects must be serialized before they are stored. Read the string back and
+parse it when the object is needed:
+
+```tsx
+const user = {
+  name: "Shravan",
+  dob: "16-01-2006",
+};
+
+await SecureStore.setItemAsync("user", JSON.stringify(user));
+
+const storedUser = await SecureStore.getItemAsync("user");
+const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+```
+
+The sample's **Save object** button stores the `user` object, and the **Get
+object** button displays its serialized JSON value.
+
+### Delete values
+
+Delete a specific stored value with `deleteItemAsync`:
+
+```tsx
+await SecureStore.deleteItemAsync("token");
+await SecureStore.deleteItemAsync("user");
+```
+
+The sample provides separate buttons for deleting the token and the saved
+object.
+
+### Check availability
+
+Check whether SecureStore is available on the current device before relying on
+it:
+
+```tsx
+const available = await SecureStore.isAvailableAsync();
+console.log(available ? "available" : "not available");
+```
+
+### Important considerations
+
+- SecureStore is intended for small sensitive values such as tokens and
+  credentials. Large payloads can be rejected by the underlying platform.
+- Android stores values using encrypted Android Keystore-backed storage.
+- iOS stores values in the Keychain. Keychain values can persist after an app
+  uninstall if the app is reinstalled with the same bundle identifier.
+- SecureStore should not be the only source of truth for irreplaceable data.
+
+## AsyncStorage notes
+
+This sample tests local, asynchronous key-value storage with
+[`@react-native-async-storage/async-storage`](https://react-native-async-storage.github.io/async-storage/).
+The implementation is in [`src/app/index.tsx`](./src/app/index.tsx).
+
+### Installation
+
+Use Expo's installer so the package version matches the Expo SDK:
+
+```bash
+npx expo install @react-native-async-storage/async-storage
+```
+
+For this Expo SDK 57 sample, the installed compatible version is `2.2.0`.
+
+### Basic operations
+
+AsyncStorage stores strings. Serialize objects before saving them and parse them
+after reading them:
+
+```tsx
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const user = {
+  name: "Suraj",
+  age: 22,
+  isDeveloper: true,
+};
+
+// Save an object
+await AsyncStorage.setItem("user", JSON.stringify(user));
+
+// Read the object
+const value = await AsyncStorage.getItem("user");
+const savedUser = value ? JSON.parse(value) : null;
+
+// Remove one key
+await AsyncStorage.removeItem("user");
+
+// Remove all keys
+await AsyncStorage.clear();
+```
+
+`getItem` returns `null` when a key does not exist. In the sample, the value is
+also displayed in the UI after pressing **Get Data**.
+
+### Multiple values
+
+Use `multiSet` and `multiGet` for several key-value pairs:
+
+```tsx
+await AsyncStorage.multiSet([
+  ["name", "Code Snippet"],
+  ["role", "Developer"],
+]);
+
+const values = await AsyncStorage.multiGet(["name", "role"]);
+console.log(values);
+```
+
+Other useful methods demonstrated in the sample include:
+
+```tsx
+const keys = await AsyncStorage.getAllKeys();
+await AsyncStorage.removeItem("user");
+await AsyncStorage.clear();
+```
+
+### `createAsyncStorage` compatibility note
+
+AsyncStorage v3 introduced `createAsyncStorage("databaseName")`, but that API
+requires the newer `RNAsyncStorage` native module. When running this sample in
+the current Expo Go runtime, using it can produce:
+
+```text
+Native module is null, cannot create db
+```
+
+For Expo SDK 57 and Expo Go, use the standard `AsyncStorage` singleton shown
+above with `setItem`, `getItem`, `multiSet`, and `multiGet`. If you intentionally
+need separate databases with `createAsyncStorage`, use a compatible development
+build that includes the required native module.
+
 ## Get a fresh project
 
 When you're ready, run:

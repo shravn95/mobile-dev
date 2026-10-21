@@ -1,106 +1,212 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function Index() {
-  const [data, setData] = useState("");
-  const userStorage = AsyncStorage;
+const Index = () => {
+  const [output, setOutput] = useState("");
 
-  const myObj = {
-    name: "Suraj",
-    age: 22,
-    isDeveloper: true,
+  const saveToken = async () => {
+    await SecureStore.setItemAsync("token", "my-secret-token");
+    setOutput("Token saved successfully!");
   };
 
-  // SetItem
-  const saveData = async () => {
-    await userStorage.setItem("user", JSON.stringify(myObj));
+  const getToken = async () => {
+    const token = await SecureStore.getItemAsync("token");
+    setOutput(token!);
+  };
+  const getObject = async () => {
+    const object = await SecureStore.getItemAsync("user");
+    setOutput(object!);
+  };
+  const deleteObject = async () => {
+    await SecureStore.deleteItemAsync("user");
+    setOutput("object deleted successfuly");
   };
 
-  // getItem
-  const getData = async () => {
-    const value = await userStorage.getItem("user");
-    setData(value!);
+  const deleteToken = async () => {
+    await SecureStore.deleteItemAsync("token");
+    setOutput("Token deleted successfully!");
   };
 
-  // removeItem
-  const removeData = async () => {
-    await userStorage.removeItem("user");
+  const checkAvailability = async () => {
+    const available = await SecureStore.isAvailableAsync();
+    setOutput(available ? "available" : "not available");
   };
 
-  const clearStorage = async () => {
-    await userStorage.clear();
+  const saveObject = async () => {
+    const object = {
+      "name: ": "Shravan",
+      dob: "16-01-2006",
+    };
 
-    setData("");
+    await SecureStore.setItemAsync("user", JSON.stringify(object));
+    setOutput("object saved successfully");
   };
-
-  const getKeys = async () => {
-    const keys = await userStorage.getAllKeys();
-
-    console.log(keys);
-  };
-
-  const saveMultiple = async () => {
-    await userStorage.multiSet([
-      ["name", "Code Snippet"],
-      ["role", "Developer"],
-    ]);
-  };
-
-  const getMultiple = async () => {
-    const values = await userStorage.multiGet(["name", "role"]);
-
-    console.log(values);
-  };
-
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        padding: 20,
-        gap: 12,
-      }}
-    >
-      <Button title="Save Data" onPress={saveData} />
+    <View style={styles.container}>
+      <Text style={styles.title}>Secure Store Demo</Text>
+      <Text style={styles.subtitle}>
+        Try each action to see how secure storage works.
+      </Text>
 
-      <Button title="Get Data" onPress={getData} />
-
-      <Button title="Remove Data" onPress={removeData} />
-
-      <Button title="Clear Storage" onPress={clearStorage} />
-
-      <Button title="Get All Keys" onPress={getKeys} />
-
-      <Button title="Multi Set" onPress={saveMultiple} />
-
-      <Button title="Multi Get" onPress={getMultiple} />
-
-      <View
-        style={{
-          marginTop: 20,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "bold",
-          }}
+      <View style={styles.buttonGroup}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={saveToken}
+          style={({ pressed }) => [
+            styles.button,
+            styles.primaryButton,
+            pressed && styles.buttonPressed,
+          ]}
         >
-          Output:
-        </Text>
+          <Text style={styles.primaryButtonText}>Save token</Text>
+        </Pressable>
 
-        <Text>{data}</Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={saveObject}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Text style={styles.buttonText}>Save object</Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={deleteObject}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Text style={styles.buttonText}>Delete object</Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={getToken}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Text style={styles.buttonText}>Get token</Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={deleteToken}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Text style={styles.buttonText}>Delete token</Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={getObject}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Text style={styles.buttonText}>Get Object</Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={checkAvailability}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Text style={styles.buttonText}>Check availability</Text>
+        </Pressable>
       </View>
-    </SafeAreaView>
+
+      <View style={styles.outputCard}>
+        <Text style={styles.outputLabel}>Output</Text>
+        <Text style={styles.output} selectable>
+          {output || "Choose an action to see its result."}
+        </Text>
+      </View>
+    </View>
   );
-}
+};
+
+export default Index;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    backgroundColor: "#f4f7fb",
+    padding: 24,
     justifyContent: "center",
+  },
+  title: {
+    color: "#172033",
+    fontSize: 28,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  subtitle: {
+    color: "#61708a",
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 28,
+  },
+  buttonGroup: {
+    gap: 12,
+  },
+  button: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#d6deea",
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 52,
+    paddingHorizontal: 20,
+  },
+  primaryButton: {
+    backgroundColor: "#3155d9",
+    borderColor: "#3155d9",
+  },
+  buttonPressed: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: "#24324a",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  primaryButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  outputCard: {
+    backgroundColor: "#e9eef8",
+    borderRadius: 12,
+    marginTop: 28,
+    minHeight: 92,
+    padding: 16,
+  },
+  outputLabel: {
+    color: "#61708a",
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    textTransform: "uppercase",
+  },
+  output: {
+    color: "#172033",
+    fontSize: 16,
   },
 });
